@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>THE SIX — NFL Predictor</title>
+
+<style>
+*{box-sizing:border-box}
+
+:root{
+  --bg:#07111f;
+  --card:#101d2f;
+  --card2:#16263b;
+  --line:#263a54;
+  --text:#fff;
+  --muted:#91a2b8;
+  --accent:#35d07f;
+  --gold:#ffc857;
+  --danger:#ff667a;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+main{
+  max-width:600px;
+  margin:auto;
+  padding:20px 16px 100px;
+}
+
+h1{
+  margin:0;
+  font-size:38px;
+  letter-spacing:2px;
+}
+
+h2{margin-top:5px}
+
+.logo{text-align:center;margin:10px 0 25px}
+
+.logo p{
+  color:var(--muted);
+  margin:5px 0;
+}
+
+.sixballs{
+  font-size:18px;
+  letter-spacing:4px;
+  margin-top:10px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+  margin:14px 0 6px;
+}
+
+select,input{
+  width:100%;
+  border:1px solid var(--line);
+  background:var(--card2);
+  color:white;
+  border-radius:12px;
+  padding:14px;
+  font-size:16px;
+}
+
+button{
+  width:100%;
+  border:0;
+  border-radius:14px;
+  padding:15px;
+  margin-top:16px;
+  font-size:16px;
+  font-weight:800;
+  background:var(--accent);
+  color:#04130b;
+}
+
+.secondary{
+  background:var(--card2);
+  color:white;
+  border:1px solid var(--line);
+}
+
+.danger{
+  background:var(--danger);
+  color:white;
+}
+
+.vs{
+  text-align:center;
+  font-weight:900;
+  color:var(--gold);
+  margin:12px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.stat{
+  background:var(--card2);
+  border-radius:12px;
+  padding:12px;
+}
+
+.stat small{
+  display:block;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+
+.big{
+  font-size:30px;
+  font-weight:900;
+}
+
+.center{text-align:center}
+
+.hidden{display:none}
+
+.resultTeam{
+  font-size:21px;
+  font-weight:900;
+}
+
+.score{
+  font-size:36px;
+  font-weight:900;
+  color:var(--gold);
+}
+
+.bar{
+  height:14px;
+  background:#24354b;
+  border-radius:20px;
+  overflow:hidden;
+  margin:10px 0;
+}
+
+.barFill{
+  height:100%;
+  background:var(--accent);
+}
+
+.matchrow{
+  display:grid;
+  grid-template-columns:1fr 80px 1fr;
+  align-items:center;
+  padding:11px 0;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+}
+
+.matchrow strong{text-align:center;color:var(--gold)}
+
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#0b1625;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:center;
+  z-index:10;
+}
+
+.navInner{
+  width:100%;
+  max-width:600px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+}
+
+.nav button{
+  margin:0;
+  border-radius:0;
+  background:transparent;
+  color:var(--muted);
+  font-size:12px;
+  padding:15px 4px;
+}
+
+.nav button.active{color:white}
+
+.notice{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+
+.teamTitle{
+  font-size:22px;
+  font-weight:900;
+}
+
+.saved{
+  color:var(--accent);
+  font-size:13px;
+  margin-top:10px;
+}
+
+footer{
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<main>
+
+<div class="logo">
+  <h1>🏈 THE SIX</h1>
+  <p>NFL PREDICTION ENGINE</p>
+  <div class="sixballs">● ● ● ● ● ●</div>
+  <p>6 STATS • 32 TEAMS • 1 PICK</p>
+</div>
+
+<!-- HOME -->
+<section id="home">
+
+<div class="card">
+<h2>Predict a Game</h2>
+
+<label>Away Team</label>
+<select id="awayTeam"></select>
+
+<div class="vs">VS</div>
+
+<label>Home Team</label>
+<select id="homeTeam"></select>
+
+<button onclick="predict()">RUN PREDICTION</button>
+</div>
+
+<div id="prediction" class="hidden">
+
+<div class="card center">
+<div id="matchTitle" class="resultTeam"></div>
+
+<p>WIN PROBABILITY</p>
+
+<div class="grid">
+<div>
+<div id="awayProb" class="big"></div>
+<div id="awayAbbr"></div>
+</div>
+
+<div>
+<div id="homeProb" class="big"></div>
+<div id="homeAbbr"></div>
+</div>
+</div>
+
+<div class="bar">
+<div id="probBar" class="barFill"></div>
+</div>
+
+<p>PROJECTED SCORE</p>
+<div id="projectedScore" class="score"></div>
+
+<p id="pick"></p>
+<p id="confidence"></p>
+</div>
+
+<div class="card">
+<h2>THE SIX Matchup</h2>
+<div id="comparison"></div>
+</div>
+
+</div>
+
+<div class="card">
+<h2>How It Works</h2>
+<p class="notice">
+THE SIX compares six core performance categories for every NFL team:
+EPA/play, success rate, points per drive, turnover differential,
+net yards per pass attempt and red-zone touchdown percentage.
+Enter team data throughout the season and the model uses those
+numbers to project matchups.
+</p>
+</div>
+
+</section>
+
+<!-- TEAMS -->
+<section id="teams" class="hidden">
+
+<div class="card">
+<h2>Team Profile</h2>
+
+<label>Select Team</label>
+<select id="profileTeam" onchange="loadProfile()"></select>
+
+<div id="profile"></div>
+</div>
+
+</section>
+
+<!-- DATA ENTRY -->
+<section id="data" class="hidden">
+
+<div class="card">
+<h2>Enter Team Data</h2>
+
+<p class="notice">
+Enter the team's current season averages. Saving again updates that team's profile.
+</p>
+
+<label>Team</label>
+<select id="dataTeam" onchange="loadDataForm()"></select>
+
+<label>EPA / Play</label>
+<input id="epa" type="number" step="0.01" placeholder="Example: 0.12">
+
+<label>Success Rate %</label>
+<input id="success" type="number" step="0.1" placeholder="Example: 46.8">
+
+<label>Points / Drive</label>
+<input id="ppd" type="number" step="0.01" placeholder="Example: 2.42">
+
+<label>Turnover Differential</label>
+<input id="turnovers" type="number" step="1" placeholder="Example: 4">
+
+<label>Net Yards / Pass Attempt</label>
+<input id="pass" type="number" step="0.1" placeholder="Example: 6.9">
+
+<label>Red-Zone TD %</label>
+<input id="redzone" type="number" step="0.1" placeholder="Example: 61.5">
+
+<button onclick="saveTeam()">SAVE TEAM DATA</button>
+
+<div id="saveMessage" class="saved"></div>
+</div>
+
+<div class="card">
+<h2>Data Storage</h2>
+<p class="notice">
+V1 stores your statistics directly on this device using your browser.
+Your data remains after refreshing the page, but it will not automatically
+sync to another phone or browser.
+</p>
+
+<button class="danger" onclick="resetData()">RESET ALL DATA</button>
+</div>
+
+</section>
+
+<footer>
+THE SIX • V1
+</footer>
+
+</main>
+
+<div class="nav">
+<div class="navInner">
+<button id="navHome" class="active" onclick="showPage('home')">🏠<br>HOME</button>
+<button id="navTeams" onclick="showPage('teams')">🏈<br>TEAMS</button>
+<button id="navData" onclick="showPage('data')">＋<br>DATA</button>
+</div>
+</div>
+
+<script>
+
+const teams = [
+["ARI","Arizona Cardinals"],
+["ATL","Atlanta Falcons"],
+["BAL","Baltimore Ravens"],
+["BUF","Buffalo Bills"],
+["CAR","Carolina Panthers"],
+["CHI","Chicago Bears"],
+["CIN","Cincinnati Bengals"],
+["CLE","Cleveland Browns"],
+["DAL","Dallas Cowboys"],
+["DEN","Denver Broncos"],
+["DET","Detroit Lions"],
+["GB","Green Bay Packers"],
+["HOU","Houston Texans"],
+["IND","Indianapolis Colts"],
+["JAX","Jacksonville Jaguars"],
+["KC","Kansas City Chiefs"],
+["LV","Las Vegas Raiders"],
+["LAC","Los Angeles Chargers"],
+["LAR","Los Angeles Rams"],
+["MIA","Miami Dolphins"],
+["MIN","Minnesota Vikings"],
+["NE","New England Patriots"],
+["NO","New Orleans Saints"],
+["NYG","New York Giants"],
+["NYJ","New York Jets"],
+["PHI","Philadelphia Eagles"],
+["PIT","Pittsburgh Steelers"],
+["SF","San Francisco 49ers"],
+["SEA","Seattle Seahawks"],
+["TB","Tampa Bay Buccaneers"],
+["TEN","Tennessee Titans"],
+["WAS","Washington Commanders"]
+];
+
+const defaults = {
+epa:0,
+success:0,
+ppd:0,
+turnovers:0,
+pass:0,
+redzone:0
+};
+
+let database = JSON.parse(localStorage.getItem("theSixTeams")) || {};
+
+teams.forEach(t=>{
+if(!database[t[0]]) database[t[0]]={...defaults};
+});
+
+function populate(){
+
+["awayTeam","homeTeam","profileTeam","dataTeam"].forEach(id=>{
+
+const select=document.getElementById(id);
+select.innerHTML="";
+
+teams.forEach(t=>{
+const option=document.createElement("option");
+option.value=t[0];
+option.textContent=t[1];
+select.appendChild(option);
+});
+
+});
+
+document.getElementById("awayTeam").value="CLE";
+document.getElementById("homeTeam").value="BAL";
+document.getElementById("profileTeam").value="CLE";
+document.getElementById("dataTeam").value="CLE";
+
+loadProfile();
+loadDataForm();
+}
+
+function teamName(code){
+return teams.find(t=>t[0]===code)?.[1] || code;
+}
+
+function showPage(page){
+
+["home","teams","data"].forEach(p=>{
+document.getElementById(p).classList.add("hidden");
+});
+
+document.getElementById(page).classList.remove("hidden");
+
+["navHome","navTeams","navData"].forEach(n=>{
+document.getElementById(n).classList.remove("active");
+});
+
+document.getElementById(
+page==="home" ? "navHome" :
+page==="teams" ? "navTeams" :
+"navData"
+).classList.add("active");
+
+if(page==="teams") loadProfile();
+}
+
+function saveTeam(){
+
+const team=document.getElementById("dataTeam").value;
+
+database[team]={
+epa:Number(document.getElementById("epa").value)||0,
+success:Number(document.getElementById("success").value)||0,
+ppd:Number(document.getElementById("ppd").value)||0,
+turnovers:Number(document.getElementById("turnovers").value)||0,
+pass:Number(document.getElementById("pass").value)||0,
+redzone:Number(document.getElementById("redzone").value)||0
+};
+
+localStorage.setItem("theSixTeams",JSON.stringify(database));
+
+document.getElementById("saveMessage").textContent=
+"✓ "+teamName(team)+" data saved.";
+
+setTimeout(()=>{
+document.getElementById("saveMessage").textContent="";
+},2500);
+}
+
+function loadDataForm(){
+
+const team=document.getElementById("dataTeam").value;
+const d=database[team] || defaults;
+
+document.getElementById("epa").value=d.epa || "";
+document.getElementById("success").value=d.success || "";
+document.getElementById("ppd").value=d.ppd || "";
+document.getElementById("turnovers").value=d.turnovers || "";
+document.getElementById("pass").value=d.pass || "";
+document.getElementById("redzone").value=d.redzone || "";
+}
+
+function loadProfile(){
+
+const team=document.getElementById("profileTeam").value;
+const d=database[team] || defaults;
+
+document.getElementById("profile").innerHTML=`
+
+<br>
+<div class="teamTitle">${teamName(team)}</div>
+
+<div class="grid" style="margin-top:15px">
+
+<div class="stat">
+<small>EPA / PLAY</small>
+<strong>${format(d.epa,2)}</strong>
+</div>
+
+<div class="stat">
+<small>SUCCESS RATE</small>
+<strong>${format(d.success,1)}%</strong>
+</div>
+
+<div class="stat">
+<small>POINTS / DRIVE</small>
+<strong>${format(d.ppd,2)}</strong>
+</div>
+
+<div class="stat">
+<small>TURNOVER DIFF</small>
+<strong>${signed(d.turnovers)}</strong>
+</div>
+
+<div class="stat">
+<small>NET YDS / PASS</small>
+<strong>${format(d.pass,1)}</strong>
+</div>
+
+<div class="stat">
+<small>RED-ZONE TD</small>
+<strong>${format(d.redzone,1)}%</strong>
+</div>
+
+</div>
+`;
+}
+
+function normalize(value,min,max){
+if(max===min) return .5;
+return Math.max(0,Math.min(1,(value-min)/(max-min)));
+}
+
+function rating(d){
+
+let score=0;
+
+score += normalize(d.epa,-0.25,0.25)*25;
+score += normalize(d.success,30,55)*15;
+score += normalize(d.ppd,1,3.5)*20;
+score += normalize(d.turnovers,-15,15)*15;
+score += normalize(d.pass,4.5,8.5)*15;
+score += normalize(d.redzone,35,80)*10;
+
+return score;
+}
+
+function predict(){
+
+const away=document.getElementById("awayTeam").value;
+const home=document.getElementById("homeTeam").value;
+
+if(away===home){
+alert("Choose two different teams.");
+return;
+}
+
+const a=database[away];
+const h=database[home];
+
+const aRating=rating(a);
+const hRating=rating(h)+2.5; // simple home-field adjustment
+
+const diff=hRating-aRating;
+
+let homeProbability=50+(diff*0.65);
+homeProbability=Math.max(10,Math.min(90,homeProbability));
+
+const awayProbability=100-homeProbability;
+
+const baseAway=20+(aRating-50)*0.12;
+const baseHome=22+(hRating-50)*0.12;
+
+let awayScore=Math.max(10,Math.round(baseAway));
+let homeScore=Math.max(10,Math.round(baseHome));
+
+if(homeProbability>50 && homeScore<=awayScore) homeScore=awayScore+3;
+if(awayProbability>50 && awayScore<=homeScore) awayScore=homeScore+3;
+
+document.getElementById("prediction").classList.remove("hidden");
+
+document.getElementById("matchTitle").textContent=
+away+" @ "+home;
+
+document.getElementById("awayProb").textContent=
+Math.round(awayProbability)+"%";
+
+document.getElementById("homeProb").textContent=
+Math.round(homeProbability)+"%";
+
+document.getElementById("awayAbbr").textContent=away;
+document.getElementById("homeAbbr").textContent=home;
+
+document.getElementById("probBar").style.width=
+homeProbability+"%";
+
+document.getElementById("projectedScore").textContent=
+away+" "+awayScore+" — "+homeScore+" "+home;
+
+const winner=homeProbability>=50 ? home : away;
+const confidence=Math.round(Math.max(homeProbability,awayProbability));
+
+document.getElementById("pick").innerHTML=
+"<strong>MODEL PICK: "+teamName(winner)+"</strong>";
+
+document.getElementById("confidence").textContent=
+"Confidence: "+confidence+"%";
+
+buildComparison(away,home);
+
+document.getElementById("prediction").scrollIntoView({
+behavior:"smooth"
+});
+}
+
+function buildComparison(aCode,hCode){
+
+const a=database[aCode];
+const h=database[hCode];
+
+const stats=[
+["EPA / Play","epa",true],
+["Success Rate","success",true],
+["Points / Drive","ppd",true],
+["Turnover Diff","turnovers",true],
+["Net Yards / Pass","pass",true],
+["Red-Zone TD","redzone",true]
+];
+
+let html="";
+
+stats.forEach(s=>{
+
+const av=a[s[1]];
+const hv=h[s[1]];
+
+let winner="TIE";
+
+if(av>hv) winner=aCode;
+if(hv>av) winner=hCode;
+
+html+=`
+<div class="matchrow">
+<span>${aCode}: ${displayStat(s[1],av)}</span>
+<strong>${s[0]}<br>${winner}</strong>
+<span style="text-align:right">${hCode}: ${displayStat(s[1],hv)}</span>
+</div>
+`;
+});
+
+document.getElementById("comparison").innerHTML=html;
+}
+
+function displayStat(stat,value){
+
+if(stat==="epa") return format(value,2);
+if(stat==="success" || stat==="redzone") return format(value,1)+"%";
+if(stat==="ppd") return format(value,2);
+if(stat==="turnovers") return signed(value);
+if(stat==="pass") return format(value,1);
+
+return value;
+}
+
+function format(v,d){
+return Number(v||0).toFixed(d);
+}
+
+function signed(v){
+v=Number(v||0);
+return v>0 ? "+"+v : String(v);
+}
+
+function resetData(){
+
+if(!confirm("Delete all saved THE SIX team data?")) return;
+
+database={};
+
+teams.forEach(t=>{
+database[t[0]]={...defaults};
+});
+
+localStorage.setItem("theSixTeams",JSON.stringify(database));
+
+loadDataForm();
+loadProfile();
+
+alert("All team data reset.");
+}
+
+populate();
+
+</script>
+
+</body>
+</html>
